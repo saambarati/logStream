@@ -1,0 +1,13 @@
+
+{
+  "name"           : "LogStream"
+  , "description"  : "Steeaming logger"
+  , "version"      : "0.0.1" 
+  , "private"      : false 
+  , "author"       : "Saam Barati <saambarati1@gmail.com>" 
+  , "contributors" : [ {"name" : "Saam Barati", "email" : "saambarati1@gmail.com"} ]
+  , "keywords"     : ["steam", "log", "logger"]
+  , "devDependencies" : { "request" : "*" }
+  , "license"      : "MIT" 
+  , "engines"       : { "node" : ">=0.6.11" }
+}
