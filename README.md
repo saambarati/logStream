@@ -32,10 +32,10 @@ console.error(new Error('i am an error'))
 log.pipe(fs.createWriteStream(path.join(__dirname, 'neats.log'))) 
 
 //pipe log to http request
-http.createServer(function(req, res) {
+var app = http.createServer(function(req, res) {
   log.pipe(res)  //log never emits end, btw
 })
-http.listen(1337)
+app.listen(1337)
 
 //pipe a url request, currently, the response is buffered, 
 //and only written to the console on the 'end' of data or when it passes 10MB in size
