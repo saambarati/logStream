@@ -27,12 +27,16 @@ console.info('currently info is same as log')
 console.warn('WARNING')
 console.error(new Error('i am an error'))
 
-log.pipe(fs.createWriteStream(path.join(__dirname, 'neats.log'))) //pipe to a file, also, you can pass filePath option and createConsole will automatically do this for you
+//pipe to a file, also, you can pass filePath option and createConsole will automatically do this for you
+log.pipe(fs.createWriteStream(path.join(__dirname, 'neats.log'))) 
 
 //pipe log to http request
 http.createServer(function(req, res) {
   log.pipe(res)  //log never emits end, btw
 })
 http.listen(1337)
+
+//pipe a url request, currently, the response is buffered, and only written to the console on the 'end' of data or when it passes 10MB in size
+request('http://urlToSomeJson').pipe(log)
 
 ```
