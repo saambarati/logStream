@@ -12,7 +12,7 @@ var fs = require('fs')
   
 logOpts = {
   filePath : path.join(__dirname, 'test.log')
-  , fileFlag : 'w'
+  , fileFlag : 'a'
   , fileEncoding : 'utf8'
   , bufferingSrc : true
   , alwaysLog : 'MASTER CLUSTER'
