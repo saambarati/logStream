@@ -52,5 +52,6 @@ function checkMem () {
 //checkMem()
 
 
-console.error(new Error('testin---Error----SB'))
+console.error(new Error('ERROR_MESSSAGE'))
 console.warn('WARNING: I AM TESTIN WARNING')
+console.trace('TRACING')

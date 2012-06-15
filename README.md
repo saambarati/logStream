@@ -20,7 +20,8 @@ logOpts = {
   alwaysLog : 'ALWAYS'
 }
 
-log = logStream.createConsole(console, logOpts) //automatically binds to console.info, console.error, console.warn, console.log
+//automatically binds to console.info, console.error, console.warn, console.log
+log = logStream.createConsole(console, logOpts) 
 console.log('this prints a number: %d', 10)
 console.log('this prints an object', {hello : 'world'})
 console.info('currently info is same as log')
@@ -36,7 +37,8 @@ http.createServer(function(req, res) {
 })
 http.listen(1337)
 
-//pipe a url request, currently, the response is buffered, and only written to the console on the 'end' of data or when it passes 10MB in size
+//pipe a url request, currently, the response is buffered, 
+//and only written to the console on the 'end' of data or when it passes 10MB in size
 request('http://urlToSomeJson').pipe(log)
 
 ```

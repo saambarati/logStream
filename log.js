@@ -171,7 +171,8 @@ Log.prototype.formatArgs = function () {
       //console.log('is buffer')
       args[i] = args[i].toString('utf8')
     } else if (util.isError(args[i])) {
-      args[i] = '' + args[i] + args[i].message + args[i].stack
+      //args[i] = '' + args[i].message + args[i].stack
+      args[i] = '' + args[i].stack
     }
   }
   return args
