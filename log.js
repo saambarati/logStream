@@ -11,6 +11,7 @@ var util = require('util')
   , fs = require('fs')
   , SECRET_SAUCE = '17dj_)91' //this is experimental, but just have some way to privatize stream writes so we can buffer multiple src streams
   , colorful = require('./colorful.js')
+  , dateable = require ('dateable')
   
 
 /* create a streaming Logger
@@ -83,9 +84,8 @@ Log.prototype.onPipe = function (src) {
 
   function onEndAndClose() {
     //console.log('src on "end" or "close" listener')
-    if (ended) { console.warn('ALREADY ENDED/CLOSED, NOT PROCESSING SECOND END/CLOSE CALL'); return;}
+    //if (ended) { console.warn('ALREADY ENDED/CLOSED, NOT PROCESSING SECOND END/CLOSE CALL'); return;}
     clearBuf()
-    ended = true
     cleanup()
   }
   src.on('end', onEndAndClose)
@@ -101,14 +101,15 @@ Log.prototype.onPipe = function (src) {
 
   function cleanup() {
     //console.log('removing src listeners')
+    if (ended) return
+    ended = true
     src.removeListener('end', onEndAndClose)
     src.removeListener('close', onEndAndClose)
     src.removeListener('data', ondata)
     src.removeListener('error', onerror)
     self.srcs.remove(self.srcs.indexOf(src))
-    //console.log('number of sources: %d', self.srcs.length)
   }
-  //add src to sources
+  //add anther src
   self.srcs.push(src)
 }
 
@@ -168,22 +169,25 @@ Log.prototype.formatArgs = function () {
       //API=>util.inspect(object, [showHidden], [depth], [colors])
       args[i] = util.inspect(args[i], false, 1, true)
     } else if (Buffer.isBuffer(args[i])) {
-      //console.log('is buffer')
       args[i] = args[i].toString('utf8')
     } else if (util.isError(args[i])) {
-      //args[i] = '' + args[i].message + args[i].stack
       args[i] = '' + args[i].stack
     }
   }
   return args
+}
+
+var dateFormat = 'MM/DD/YYYY##HH:mm:ss'
+function formattedDate() {
+  return dateable.format(new Date(), dateFormat)
 }
 Log.prototype.log = function () {
   var args = this.formatArgs.apply(this, slice.apply(arguments))
     , data 
 
   data = colorful.colorMany([
-        ['green', (new Date()).toString()]
-        , ['white', '::=>']
+        ['green', formattedDate()]
+        , ['white', '=>']
         , ['blue', this.alwaysLog]
       ])
   
@@ -197,9 +201,9 @@ Log.prototype.error = function () {
     , data
   
   data = colorful.colorMany([
-        ['red', (new Date()).toString()]
-        , ['white', '::=>']
-        , ['blue', this.alwayslog]
+        ['red', formattedDate()]
+        , ['white', '=>']
+        , ['blue', this.alwaysLog]
       ])
   data +=  ' ' + util.format.apply(util, args)
   //data = data.replace(/(\r\n|\n|\r)/gm, '', 'gm') + '\n'
@@ -211,9 +215,9 @@ Log.prototype.warn = function () {
     , data
   
   data = colorful.colorMany([
-        ['yellow', (new Date()).toString()]
-        , ['white', '::=>']
-        , ['blue', this.alwayslog]
+        ['yellow', formattedDate()]
+        , ['white', '=>']
+        , ['blue', this.alwaysLog]
       ])
   data +=  ' ' + util.format.apply(util, args)
   data = data.replace(/(\r\n|\n|\r)/gm, '', 'gm') + '\n'

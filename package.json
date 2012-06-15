@@ -8,6 +8,7 @@
   , "contributors"      : [ {"name" : "Saam Barati", "email" : "saambarati1@gmail.com"} ]
   , "keywords"          : ["stream", "log", "logger", "logging"]
   , "devDependencies"   : { "request" : "*" }
+  , "dependencies"      : { "dateable" : "*" }
   , "main"              : "./log.js"
   , "license"           : "MIT" 
   , "engines"           : { "node" : ">=0.6.17" }
