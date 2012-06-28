@@ -145,34 +145,37 @@ Log.prototype.pipe = function (destination, opts) {
 Log.prototype.end = function (chunk, key) {
   if (chunk) {
     //console.log(chunk)
-    console.log('ended with chunk')
+    //console.log('ended with chunk')
     this.write(chunk, key)
   } else {
-    console.log('ended without chunk')
+    //console.log('ended without chunk')
   }
 }
 Log.prototype.write = function (chunk, encoding, key) {
-  if (key !== SECRET_SAUCE && encoding !== SECRET_SAUCE) return //stop from normal piping b/c we are caching solo
+  if (!(key === SECRET_SAUCE || encoding === SECRET_SAUCE)) return //stop from normal piping b/c we are buffering each individual src
   if (encoding && encoding !== SECRET_SAUCE)  chunk = chunk.toString(encoding)
   //console.log('write method on Log called')
   //this.emit('data', chunk)
   this.log(chunk) //will emit 'data'
 }
 
-var slice = Array.prototype.slice
+
+
 //logging shit
+var slice = Array.prototype.slice
 Log.prototype.formatArgs = function () {
   var i
     , args = slice.call(arguments)
   for (i = 0; i < args.length; i++) {
     if (args[i].toString() === '[object Object]') {
-      //API=>util.inspect(object, [showHidden], [depth], [colors])
+      //util API=>util.inspect(object, [showHidden], [depth], [colors])
       args[i] = util.inspect(args[i], false, 1, true)
     } else if (Buffer.isBuffer(args[i])) {
       args[i] = args[i].toString('utf8')
     } else if (util.isError(args[i])) {
       args[i] = '' + args[i].stack
     }
+    //else.. do nothing
   }
   return args
 }
@@ -225,6 +228,9 @@ Log.prototype.warn = function () {
 }
 
 
+//TODO find a way to strip ANSI colors from 'emit'ed data
+//one possible solution, emit data without ansi colors and attach a listener to self's data
+//and write out log statements manually to stdout w/ ansi color
 
 /*
  * @API Public
