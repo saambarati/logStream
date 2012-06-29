@@ -255,10 +255,6 @@ Log.prototype.warn = function () {
 
 
 
-//TODO find a way to strip ANSI colors from 'emit'ed data
-//one possible solution, emit data without ansi colors and attach a listener to self's data
-//and write out log statements manually to stdout w/ ansi color
-
 /*
  * @API Public
  * @param console {global object}
@@ -270,7 +266,6 @@ Log.prototype.warn = function () {
  *                => alwaysLog -> {bool} something that will at the beginning of each log statement
  *                => toStdout -> {bool} whether to write data to stdout. Defaults to true
 */
-//creates a logger that can also replace the console
 function createConsole (cons, opts) {
   if (!opts) opts = {}
   var log = new Log({ bufferingSrc : (opts.bufferingSrc !== undefined ? opts.bufferingSrc : true), alwaysLog : opts.alwaysLog })
