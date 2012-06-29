@@ -11,7 +11,7 @@ var fs = require('fs')
   , request = require('request')
   
 logOpts = {
-  filePath : path.join(__dirname, 'test.log')
+  filePath : path.join(__dirname, 'file.log')
   , fileFlag : 'a'
   , fileEncoding : 'utf8'
   , bufferingSrc : true
@@ -32,7 +32,15 @@ var header = {
     accept : 'text/html'
   }
 }
-request.get(header).pipe(logger)
+var reqs = request.get(header)
+reqs.pipe(logger)
+reqs.on('end', function () {
+  process.nextTick(function() {
+    console.warn('exiting process after test has completed')
+    //process.nextTick(function() {process.exit(0)})
+    setTimeout(function(){process.exit(0)}, 4000)
+  })
+})
 
 
 //TODO, why is it emitting data twice?
@@ -55,3 +63,8 @@ function checkMem () {
 console.error(new Error('ERROR_MESSSAGE'))
 console.warn('WARNING: I AM TESTIN WARNING')
 console.trace('TRACING')
+
+for (var i = 0; i < 50; i++) {
+  console.log('testing piping to files: ' + i)
+}
+

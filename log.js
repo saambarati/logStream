@@ -40,6 +40,7 @@ function Log(options) {
   }
 
   self.on('pipe',  Log.prototype.onPipe)
+  self.on('tostdout', Log.prototype.logErrorInfo)
 }
 util.inherits(Log, stream.Stream)
 
@@ -161,15 +162,17 @@ Log.prototype.write = function (chunk, encoding, key) {
 
 
 
+
 //logging shit
 var slice = Array.prototype.slice
+//@return {array} of args
 Log.prototype.formatArgs = function () {
   var i
     , args = slice.call(arguments)
   for (i = 0; i < args.length; i++) {
     if (args[i].toString() === '[object Object]') {
       //util API=>util.inspect(object, [showHidden], [depth], [colors])
-      args[i] = util.inspect(args[i], false, 1, true)
+      args[i] = util.inspect(args[i], false, 1, false)
     } else if (Buffer.isBuffer(args[i])) {
       args[i] = args[i].toString('utf8')
     } else if (util.isError(args[i])) {
@@ -184,48 +187,76 @@ var dateFormat = 'MM/DD/YYYY##HH:mm:ss'
 function formattedDate() {
   return dateable.format(new Date(), dateFormat)
 }
-Log.prototype.log = function () {
-  var args = this.formatArgs.apply(this, slice.apply(arguments))
-    , data 
 
+var stdoutColors = {
+  'log' : 'green'
+  , 'error' : 'red'
+  , 'warn' : 'yellow'
+}
+//write to stdout
+Log.prototype.logErrorInfo = function (type, data, date) {
+  //this event is fired on 'tostdout'
+   
   data = colorful.colorMany([
-        ['green', formattedDate()]
+        [stdoutColors[type], date]
         , ['white', '=>']
         , ['blue', this.alwaysLog]
-      ])
+      ]) + ' ' + data
+ 
+  switch (type) {
+    case 'error' : 
+      data += '\n' //don't strip lines
+      break
+    default :
+      data = data.replace(/(\r\n|\n|\r)/gm, '') + '\n'
+  }
+  process.stdout.write(data)
+}
+
+Log.prototype.log = function () {
+  var args = this.formatArgs.apply(this, slice.apply(arguments))
+    , data
+    , date = formattedDate()
+
+  args = util.format.apply(util, args)
+  this.emit('tostdout', 'log', args, date)
   
-  data += ' ' + util.format.apply(util, args)
-  data = data.replace(/(\r\n|\n|\r)/gm, '', 'gm') + '\n'
-  this.emit('data', data)
+  if (this.listeners('data').length) {
+    data = date + '=>' + this.alwaysLog + ' ' + args
+    data = data.replace(/(\r\n|\n|\r)/gm, '') + '\n'
+    this.emit('data', data)
+  }
 }
 Log.prototype.info = Log.prototype.log
 Log.prototype.error = function () {
   var args = this.formatArgs.apply(this, slice.apply(arguments))
     , data
+    , date = formattedDate()
   
-  data = colorful.colorMany([
-        ['red', formattedDate()]
-        , ['white', '=>']
-        , ['blue', this.alwaysLog]
-      ])
-  data +=  ' ' + util.format.apply(util, args)
-  //data = data.replace(/(\r\n|\n|\r)/gm, '', 'gm') + '\n'
-  data += '\n' //try not stripping lines on error
-  this.emit('data', data)
+  args = util.format.apply(util, args)
+  this.emit('tostdout', 'error', args, date)
+
+  if (this.listeners('data').length) {
+    data = date + '=>' + this.alwaysLog + ' ' + args
+    data += '\n' //try not stripping lines on error
+    this.emit('data', data)
+  }
 }
 Log.prototype.warn = function () {
   var args = this.formatArgs.apply(this, slice.apply(arguments))
     , data
+    , date = formattedDate()
   
-  data = colorful.colorMany([
-        ['yellow', formattedDate()]
-        , ['white', '=>']
-        , ['blue', this.alwaysLog]
-      ])
-  data +=  ' ' + util.format.apply(util, args)
-  data = data.replace(/(\r\n|\n|\r)/gm, '', 'gm') + '\n'
-  this.emit('data', data)
+  args = util.format.apply(util, args)
+  this.emit('tostdout', 'warn', args, date)
+
+  if (this.listeners('data').length) {
+    data = date + '=>' + this.alwaysLog + ' ' + args
+    data = data.replace(/(\r\n|\n|\r)/gm, '') + '\n'
+    this.emit('data', data)
+  }
 }
+
 
 
 //TODO find a way to strip ANSI colors from 'emit'ed data
@@ -248,7 +279,6 @@ function createConsole (cons, opts) {
   var log = new Log({ bufferingSrc : (opts.bufferingSrc !== undefined ? opts.bufferingSrc : true), alwaysLog : opts.alwaysLog })
     , fileOpts
 
-  log.pipe(process.stdout)
   if (opts.filePath) {
     fileOpts = {
       flags : opts.fileFlag || 'a'
@@ -257,6 +287,7 @@ function createConsole (cons, opts) {
     log.pipe(fs.createWriteStream(opts.filePath, fileOpts))
   }
   
+  //log.pipe(process.stdout)
   cons.pipe = log.pipe.bind(log)
   cons.log = log.log.bind(log)
   cons.info = log.info.bind(log)
