@@ -40,7 +40,6 @@ function Log(options) {
   }
 
   self.on('pipe',  Log.prototype.onPipe)
-  self.on('tostdout', Log.prototype.logErrorInfo)
 }
 util.inherits(Log, stream.Stream)
 
@@ -193,8 +192,9 @@ var stdoutColors = {
   , 'error' : 'red'
   , 'warn' : 'yellow'
 }
-//write to stdout
-Log.prototype.logErrorInfo = function (type, data, date) {
+
+//write to stdout with ANSI colors
+Log.prototype._toStdout = function (type, data, date) {
   //this event is fired on 'tostdout'
    
   data = colorful.colorMany([
@@ -203,20 +203,16 @@ Log.prototype.logErrorInfo = function (type, data, date) {
         , ['blue', this.alwaysLog]
       ]) + ' ' + data
  
-  switch (type) {
-    case 'error' : 
-      data += '\n' //don't strip lines
-      break
-    default :
-      data = data.replace(/(\r\n|\n|\r)/gm, '') + '\n'
-  }
+  if (type === 'error')  data += '\n' //don't strip lines
+  else data = data.replace(/(\r\n|\n|\r)/gm, '') + '\n'
+
   process.stdout.write(data)
 }
 
 Log.prototype.log = function () {
   var args = this.formatArgs.apply(this, slice.apply(arguments))
     , data
-    , date = formattedDate()
+    , date = formattedDate() //make sure date is same as stdout and as file
 
   args = util.format.apply(util, args)
   this.emit('tostdout', 'log', args, date)
@@ -245,7 +241,7 @@ Log.prototype.error = function () {
 Log.prototype.warn = function () {
   var args = this.formatArgs.apply(this, slice.apply(arguments))
     , data
-    , date = formattedDate()
+    , date = formattedDate() 
   
   args = util.format.apply(util, args)
   this.emit('tostdout', 'warn', args, date)
@@ -267,11 +263,12 @@ Log.prototype.warn = function () {
  * @API Public
  * @param console {global object}
  * @param options {object} 
- *                => filePath --> to log to a file as well
- *                => fileFlag open flag => defaults to 'a' --> append
- *                => fileEncoding => defaults to utf8
- *                => bufferingSrc -> whether to buffer incoming pipes -> defaults to true
- *                => alwaysLog -> something that will at the beginning of each log statement
+ *                => filePath --> {string} to log to a file as well
+ *                => fileFlag open flag => {string} defaults to 'a' --> append
+ *                => fileEncoding => {string} defaults to utf8
+ *                => bufferingSrc -> {bool} whether to buffer incoming pipes -> defaults to true
+ *                => alwaysLog -> {bool} something that will at the beginning of each log statement
+ *                => toStdout -> {bool} whether to write data to stdout. Defaults to true
 */
 //creates a logger that can also replace the console
 function createConsole (cons, opts) {
@@ -286,6 +283,9 @@ function createConsole (cons, opts) {
     }
     log.pipe(fs.createWriteStream(opts.filePath, fileOpts))
   }
+  if (opts.toStdout === undefined || opts.toStdout) {
+    log.on('tostdout', log._toStdout)
+  }
   
   //log.pipe(process.stdout)
   cons.pipe = log.pipe.bind(log)
@@ -298,6 +298,5 @@ function createConsole (cons, opts) {
 }
 
 exports.createConsole = createConsole
-
 
 

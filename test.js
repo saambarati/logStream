@@ -11,11 +11,12 @@ var fs = require('fs')
   , request = require('request')
   
 logOpts = {
-  filePath : path.join(__dirname, 'file.log')
+  filePath : path.join(__dirname, 'logfile.log')
   , fileFlag : 'a'
   , fileEncoding : 'utf8'
   , bufferingSrc : true
   , alwaysLog : 'MASTER CLUSTER'
+  //, toStdout : false //defaults to true
 }
 logger = log.createConsole(console, logOpts)
 
@@ -36,9 +37,9 @@ var reqs = request.get(header)
 reqs.pipe(logger)
 reqs.on('end', function () {
   process.nextTick(function() {
-    console.warn('exiting process after test has completed')
+    console.warn('about to exit process... test has completed')
     //process.nextTick(function() {process.exit(0)})
-    setTimeout(function(){process.exit(0)}, 4000)
+    setTimeout(function(){process.exit(0)}, 2000)
   })
 })
 
