@@ -266,7 +266,7 @@ Log.prototype.warn = function () {
  *                => alwaysLog -> {bool} something that will at the beginning of each log statement
  *                => toStdout -> {bool} whether to write data to stdout. Defaults to true
 */
-function create (cons, opts) {
+function create(cons, opts) {
   if (!opts) opts = {}
   var log = new Log({ bufferingSrc : (opts.bufferingSrc !== undefined ? opts.bufferingSrc : true), alwaysLog : opts.alwaysLog })
     , fileOpts
@@ -292,6 +292,6 @@ function create (cons, opts) {
   return log
 }
 
-exports.createConsole = createConsole
+exports.create = create
 
 
