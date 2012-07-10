@@ -21,7 +21,7 @@ logOpts = {
 }
 
 //automatically binds to console.info, console.error, console.warn, console.log
-log = logStream.createConsole(console, logOpts) 
+log = logStream.create(console, logOpts) 
 console.log('this prints a number: %d', 10)
 console.log('this prints an object', {hello : 'world'})
 console.info('currently info is same as log')
