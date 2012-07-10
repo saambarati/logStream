@@ -18,7 +18,7 @@ logOpts = {
   , alwaysLog : 'MASTER CLUSTER'
   //, toStdout : false //defaults to true
 }
-logger = log.createConsole(console, logOpts)
+logger = log.create(console, logOpts)
 
 console.pipe(fs.createWriteStream(path.join(__dirname, 'new.log')))
 //fs.createReadStream(path.join(__dirname, 'longFile.txt'), {encoding:'utf8'}).pipe(logger)

@@ -168,13 +168,15 @@ var slice = Array.prototype.slice
 Log.prototype.formatArgs = function () {
   var i
     , args = slice.call(arguments)
+    , arg
   for (i = 0; i < args.length; i++) {
-    if (args[i].toString() === '[object Object]') {
+    arg = args[i]
+    if (arg && arg.toString() === '[object Object]' ) {
       //util API=>util.inspect(object, [showHidden], [depth], [colors])
       args[i] = util.inspect(args[i], false, 1, false)
-    } else if (Buffer.isBuffer(args[i])) {
+    } else if (Buffer.isBuffer(arg)) {
       args[i] = args[i].toString('utf8')
-    } else if (util.isError(args[i])) {
+    } else if (util.isError(arg)) {
       args[i] = '' + args[i].stack
     }
     //else.. do nothing
