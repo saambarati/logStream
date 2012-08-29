@@ -2,7 +2,7 @@
 {
   "name"                : "logStream"
   , "description"       : "Streaming Logger"
-  , "version"           : "0.1.4" 
+  , "version"           : "0.1.5" 
   , "private"           : false 
   , "author"            : "Saam Barati <saambarati1@gmail.com>" 
   , "contributors"      : [ {"name" : "Saam Barati", "email" : "saambarati1@gmail.com"} ]

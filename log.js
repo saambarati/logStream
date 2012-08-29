@@ -29,15 +29,15 @@ function Log(options) {
   //trying something unconventional by having multiple destinations and sources
   self.srcs = []
   self.dests = []
+  self.bufferingSrc = true //regarding being readable stream, don't emit data until buffering stops
+  self.maxBufferSize = 10 * 1024 * 1024
+  self.alwaysLog = ''
   if (options) {
     if (typeof options.bufferingSrc !== 'undefined') self.bufferingSrc = options.bufferingSrc
     if (typeof options.maxBufferSize !== 'undefined') self.maxBufferSize = options.maxBufferSize
     self.alwaysLog = options.alwaysLog || ''
-  } else {
-    self.bufferingSrc = true //regarding being readable stream, don't emit data until buffering stops
-    self.maxBufferSize = 10 * 1024 * 1024
-    self.alwaysLog = ''
   }
+ 
 
   self.on('pipe',  Log.prototype.onPipe)
 }
@@ -179,7 +179,6 @@ Log.prototype.formatArgs = function () {
     } else if (util.isError(arg)) {
       args[i] = '' + args[i].stack
     }
-    //else.. do nothing
   }
   return args
 }
