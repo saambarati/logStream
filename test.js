@@ -6,7 +6,7 @@ var fs = require('fs')
   , util = require('util')
   , assert = require('assert')
   , request = require('request')
-  , log = require('./log.js')
+  , logStream = require('./log.js')
   , logOpts
   , logger
   , i = 0
@@ -17,11 +17,10 @@ logOpts = {
   filePath : f1Path
   , fileFlag : 'w'
   , fileEncoding : 'utf8'
-  , bufferingSrc : true
   , alwaysLog : 'MASTER CLUSTER'
   //, toStdout : false //defaults to true
 }
-logger = log(logOpts)
+logger = logStream(logOpts)
 
 //pipe to a file
 logger.pipe(fs.createWriteStream(f2Path, {flags : logOpts.fileFlag }))
@@ -33,6 +32,7 @@ console.warn('testing warning')
 console.trace('console.trace')
 console.error(new Error('testing error'))
 
+
 var header = {
   url : 'http://saambarati.org'
   , headers : {
@@ -43,11 +43,15 @@ var header = {
 var reqs = request('http://saambarati.org')
 reqs.pipe(logger.child())
 
-reqs.on('end', function () {
-  logger.log('reqs ended')
+logger.child( request('http://saambarati.org/about') )
+
+
+
+
+logger.on('zeroChildren', function end() {
+  console.log('about to end')
   process.nextTick(function() {
-    //process.nextTick(function() {process.exit(0)})
-    setTimeout(function(){process.exit(0)}, 0)
+    process.exit(0)
   })
 })
 
