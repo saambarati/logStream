@@ -19,16 +19,16 @@ var logStream = require('logStream')
   , logOpts
   , log
 
-/*
- * @param {object}
-*   => {string} filePath       to log to a file as well, basically pipes logger to a fs.writeStream
-*   if (filePath)
-*     => {string} fileFlag       how to open the file in filePath. defaults to 'a' --> append
-*     => {string} fileEncoding   defaults to utf8
-*   => {string} alwaysLog      something that will be written at the beginning of each log statement. useful for identifying separate clusters
-*   => {bool}   toStdout       whether to write data to stdout. Defaults to true
-*   => {object} console        object to attach 'log', 'error', 'info' methods. default is the global console object
-*   => {number} bufSize        the buffer size of logger.child() streams before they emit data
+/**
+*  options object
+*  {string} filePath       to log to a file as well, basically pipes logger to a fs.writeStream
+*  if (filePath)
+*    {string} fileFlag       how to open the file in filePath. defaults to 'a' --> append
+*    {string} fileEncoding   defaults to utf8
+*  {string} alwaysLog      something that will be written at the beginning of each log statement. useful for identifying separate clusters
+*  {bool}   toStdout       whether to write data to stdout. Defaults to true
+*  {object} console        object to attach 'log', 'error', 'info' methods. default is the global console object
+*  {number} bufSize        the buffer size of logger.child() streams before they emit data
 */
 logOpts = {
   filePath : f1Path
@@ -59,7 +59,7 @@ app.listen(1337)
 //pipe a url request, currently, the response is buffered,
 //and only written to the console on the 'end' of data or when it passes 10MB in size
 request('http://urlToSomeJson').pipe( log.child() )
-log.child( request('http://nodejs.org') ) //logStream will listen for data events on request
+log.child( request('http://nodejs.org') ) //logStream will listen for data events on request(url) object
 
 
 ```
