@@ -4,68 +4,60 @@ var fs = require('fs')
   , path = require('path')
   , http = require('http')
   , util = require('util')
-  , i = 0
+  , assert = require('assert')
+  , request = require('request')
   , log = require('./log.js')
   , logOpts
   , logger
-  , request = require('request')
-  
+  , i = 0
+  , f1Path = path.join(__dirname, 'logfile.log')
+  , f2Path = path.join(__dirname, 'pipe.log')
+
 logOpts = {
-  filePath : path.join(__dirname, 'logfile.log')
-  , fileFlag : 'a'
+  filePath : f1Path
+  , fileFlag : 'w'
   , fileEncoding : 'utf8'
   , bufferingSrc : true
   , alwaysLog : 'MASTER CLUSTER'
   //, toStdout : false //defaults to true
 }
-logger = log.create(console, logOpts)
+logger = log(logOpts)
 
-console.pipe(fs.createWriteStream(path.join(__dirname, 'new.log')))
+//pipe to a file
+logger.pipe(fs.createWriteStream(f2Path, {flags : logOpts.fileFlag }))
+
 //fs.createReadStream(path.join(__dirname, 'longFile.txt'), {encoding:'utf8'}).pipe(logger)
-console.log('testin number: %d', 4, ' hello')
-console.log('testing object: ', {hello : 'world'})
-process.stdin.resume()
-process.stdin.setEncoding('utf8')
-process.stdin.pipe(logger)
+console.log('testing %% operators: number: %d', 1, ' hello')
+console.log('testing object: ', {hello : 'world', nested : { another:'object'}})
+console.warn('testing warning')
+console.trace('console.trace')
+console.error(new Error('testing error'))
+
 var header = {
   url : 'http://saambarati.org'
   , headers : {
     accept : 'text/html'
   }
 }
-var reqs = request.get(header)
-reqs.pipe(logger)
+
+var reqs = request('http://saambarati.org')
+reqs.pipe(logger.child())
+
 reqs.on('end', function () {
+  logger.log('reqs ended')
   process.nextTick(function() {
-    console.warn('about to exit process... test has completed')
     //process.nextTick(function() {process.exit(0)})
-    setTimeout(function(){process.exit(0)}, 2000)
+    setTimeout(function(){process.exit(0)}, 0)
   })
 })
 
 
-//TODO, why is it emitting data twice?
-var app = http.createServer(function (req, res) {
-  res.writeHead(200, {'content-type' : 'text/plain'})
-  res.write('hello')
-  console.log(req.headers)
-  //console.log('piping to res')
-  logger.pipe(res)
+
+process.on('exit', function() {
+  assert(fs.readFileSync(f1Path, 'utf8') === fs.readFileSync(f2Path, 'utf8'))
+  console.log('piped files are equal')
+  console.log('processes exiting, tests have passed')
 })
-app.listen(8081)
-
-function checkMem () {
-  setTimeout(checkMem, 1000)
-  console.log(util.inspect(process.memoryUsage()))
-}
-//checkMem()
 
 
-console.error(new Error('ERROR_MESSSAGE'))
-console.warn('WARNING: I AM TESTIN WARNING')
-console.trace('TRACING')
-
-for (var i = 0; i < 50; i++) {
-  console.log('testing piping to files: ' + i)
-}
 
