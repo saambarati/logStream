@@ -122,7 +122,7 @@ function create(opts) {
   return logger
 }
 
-module.exports.create = create //backwards compatability
 module.exports = create
+module.exports.create = create //backwards compatability
 
 
