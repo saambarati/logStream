@@ -23,6 +23,7 @@ function create(opts) {
   opts.console = opts.console || console
   opts.dateFormat = opts.dateFormat || 'MM/DD/YYYY##HH:mm:ss'
   opts.bufSize = opts.bufSize || 20 * 1024
+  opts.alwaysLog = opts.alwaysLog || ''
 
   var logger = master({bufSize : opts.bufSize})
     , fileOpts
