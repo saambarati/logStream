@@ -123,6 +123,5 @@ function create(opts) {
 }
 
 module.exports = create
-module.exports.create = create //backwards compatability
 
 
